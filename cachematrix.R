@@ -35,10 +35,12 @@ makeCacheMatrix <- function(x = matrix()) {
         }else{
           x         <<- tempMatrix
           invMatrix <<- NULL
-          isSet     <<- F 
+          isSet     <<- F
+          message("New matrix is set.")
         }  
       }else{
         message("This New Matrix is identical to previously saved Matrix")
+        message("and is not therefore set.")
       }    
   }
   
