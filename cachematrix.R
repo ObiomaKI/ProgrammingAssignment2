@@ -5,15 +5,19 @@
 ## to the variable x. The tempMatrix is used to make sure that the same matrix is 
 ## not used to replace an existing matrix of the same values. This will also mean
 ## that the calculated INVERSE of the matrix is not recalculated in cacheSolve function.
-## ---This does not allow an INVERSE to be set if that INVERSE is not equal to the
-## ---the INVERSE of a stored matrix or if the variable 'x' is NULL.
-## If a user tried to set a Singular matrix, the fuction would not allow this and it
+## This function does not allow an INVERSE to be set by a user. It is set in cacheSolve.
+## 
+## If a user tries to set a Singular matrix, the fuction would not allow this and it
 ## retains the previous matrix.
-## How to use
+##                              How to use
 ## 1. Assigne makeCacheMatrix to a variable. For example v <- makeCatcheMatrix()
 ## 2. Create a square matrix and use V$setMatrix(<your_invertible_matrix) to set the matix
 ## 3. Call cacheSolve function with variable 'v' to create the INVERSE of your Matrix.
 ##    For example, cacheSolve(v). 
+##
+## Written by: Kenneth Ishionwu
+## Date      : June 21, 2014
+## Coursera Peer Assessement assignment by Dr. Roger Peng of Johns Hopkins University
 
 makeCacheMatrix <- function(x = matrix()) {
   
@@ -25,28 +29,39 @@ makeCacheMatrix <- function(x = matrix()) {
       if (!identical(tempMatrix, x)){
         detMatrix <- det(in_matrix)
         if(detMatrix == 0){
-          message("The supplied Matrix is not INVERTIBLE and an INVERSE could not be calculated")
-          message("therefore, this matrix is not set")
+          message("The supplied Matrix is not INVERTIBLE and an INVERSE could")
+          message("not be calculated therefore, this matrix is not set")
           tempMatrix <<- x  # store the original matrix in tempMatrix
         }else{
           x         <<- tempMatrix
           invMatrix <<- NULL
+          isSet     <<- F 
         }  
       }else{
         message("This New Matrix is identical to previously saved Matrix")
-      }
-    
+      }    
   }
   
   getMatrix    <- function(){
     if(is.null(x)){
-      message("Matrix is not set, a NULL is returned")
-      return(NULL)
+      message("No matrix is set")      
     }else{
-      return(x)
+      x
     }  
-  }  
-  setInvMatrix <- function(z) invMatrix <<- z
+  } 
+  
+  
+  ## This is to prevent a user from using setInvMatrix function to set
+  ## an abitrary INVERSE for any matrix. The only way to set an INVERSE is
+  ## at cacheSolve. That is, within the function only.
+  
+  setInvMatrix <- function(z){
+    if(isSet){
+      invMatrix <<- z
+    }else{
+      message("You are not allowed to set INVERSE of a Matrix")
+    } 
+  } 
   getInvMatrix <- function()invMatrix
   list(setMatrix = setMatrix,
        setInvMatrix = setInvMatrix,
@@ -64,7 +79,7 @@ makeCacheMatrix <- function(x = matrix()) {
 ##  get and set the the object
 
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+  ## Return a matrix that is the inverse of 'x'
   invMatrix <- x$getInvMatrix()
   if(!is.null(invMatrix)) {
       message("Retrieving cached Inverse Matrix")
@@ -72,6 +87,9 @@ cacheSolve <- function(x, ...) {
   }
   data <- x$getMatrix()
   invMatrix <- solve(data, ...)
+  isSet <<- T  ## After the inverse is calculated, set isSet Variable to TRUE.
   x$setInvMatrix(invMatrix)
+  isSet <<- F  ## After setting the invMatrix, setit to False to not allow 
+               ## setting from outside this function.
   invMatrix  
 }
